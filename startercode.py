@@ -137,25 +137,25 @@ def get_groups_above_cutoff(cutoff, cache_file):
 
 # Extra Credit
 def recommend_breeds_in_same_group(breed_name, cache_file):
-    """
-    Recommends other breeds in the cache that share the same Dog API group id as
-    the given breed. Match the target breed by data["attributes"]["name"] (case-insensitive).
-    Compare groups using data["relationships"]["group"]["data"]["id"] (UUID).
-    Exclude the target breed in the result list.
-    Return breed names sorted alphabetically.
+   cache = load_json(cache_file)
+   if cache == {}:
+       return "No breed data found in cache."
+   
+   target_name = None
+   target_group_id = None
 
-    ARGUMENTS:
-        breed_name: the breed name to look up in the cache
-        cache_file: path to the JSON cache file
+   for entry in cache.values():
+       try:
+           name = entry["data"]["attributes"]["name"]
+        except (KeyError, Type)
+       continue
+   
 
-    RETURNS:
-        EITHER a sorted list of other breed names in the same group
-        OR one of these strings:
-            "No breed data found in cache."  (empty cache)
-            "'{breed_name}' is not in the cache."  (name not found)
-            "No group information available for '{breed_name}'."  (no group id)
-            "No recommendations found based on '{breed_name}'."  (no other breeds in that group)
-    """
+   if name.lower() == breed_name.lower():
+       target_name = name
+       try:
+           target_group_id = entry["data"]["relationships"]["group"]["data"]["id"]
+
 
 
 class TestHomeworkDogAPI(unittest.TestCase):
