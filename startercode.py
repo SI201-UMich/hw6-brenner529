@@ -140,41 +140,47 @@ def recommend_breeds_in_same_group(breed_name, cache_file):
    cache = load_json(cache_file)
    if cache == {}:
        return "No breed data found in cache."
-   
    target_name = None
    target_group_id = None
 
    for entry in cache.values():
        try:
            name = entry["data"]["attributes"]["name"]
-        except (KeyError, Type)
-       continue
+       except (KeyError, TypeError):
+           continue
+       if name.lower() == breed_name.lower():
+           target_name = name
+           try:
+               target_group_id = entry["data"]["relationships"]["group"]["data"]["id"]
+           except (KeyError, TypeError):
+               return f"No group information available for '{breed_name}'."
+           break
+       
+   if target_name is None:
+       return f"'{breed_name}' is not in the cache."
+   recommendations = []
+   for entry in cache.values():
+       try:
+           name = entry["data"]["attributes"]["name"]
+           group_id = entry["data"]["relationships"]["group"]["data"]["id"]
+       except (KeyError, TypeError):
+           continue
+       
+       if group_id == target_group_id and name.lower() != breed_name.lower():
+           recommendations.append(name)
+
+   if len(recommendations) == 0:
+       return f"No recommendations found based on '{breed_name}'."
+   
+   return sorted(recommendations)
+    
    
 
-   if name.lower() == breed_name.lower():
-       target_name = name
-       try:
-           target_group_id = entry["data"]["relationships"]["group"]["data"]["id"]
-        except (KeyError, TypeError):
-           return f"No group information available for '{breed_name}'."
-       break
-if target_name is None:
-    return f"'{breed_name}' is not in the cache."
-recommendations = []
+       
+    
 
-for entry in cache.values():
-    try:
-        name = entry["data"]["attributes"]["name"]
-        group_id = entry["data"]["relationships"]["group"]["data"]["id"]
-    except (KeyError, TypeError):
-        continue
-
-    if group_id == target_group_id and name.lower() != breed_name.lower():
-        recommendations.append(name)
-if len(recommendations) == 0:
-    return f"No recommendations found based on '{breed_name}'."
-
-return sorted(recommendations)
+   
+  
 
 
 
