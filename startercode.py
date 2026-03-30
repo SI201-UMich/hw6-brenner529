@@ -115,22 +115,24 @@ def get_longest_lifespan_breed(cache_file):
 
 
 def get_groups_above_cutoff(cutoff, cache_file):
-    """
-    Counts how many cached breeds belong to each Dog API group, then keeps only
-    groups whose count is greater than or equal to cutoff.
+    cache = load_json(cache_file)
+    group_counts = {}
+    for entry in cache.values():
+        try:
+            group_id = entry["data"]["relationships"]["group"]["data"]["id"]
+        except (KeyError, TypeError):
+            continue
+        if group_id:
+            group_counts[group_id] = group_counts.get(group_id, 0) + 1
+    result = {}
+    for group_id, count in group_counts.items():
+        if count >= cutoff:
+            result[group_id] = count
 
-    In Dog API v2, a breed's group is not a string in attributes; it is linked via:
-        data.relationships.group.data.id   (a group UUID string)
-    Skip any cache entry that has no group relationship or no id there.
+    return result
 
-    ARGUMENTS:
-        cutoff: minimum number of breeds a group must have to appear in the result
-        cache_file: path to the JSON cache file
 
-    RETURNS:
-        A dictionary {group_uuid: count} for groups with count >= cutoff only.
-    """
-    pass
+  
 
 
 # Extra Credit
