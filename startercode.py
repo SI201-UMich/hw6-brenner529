@@ -101,6 +101,8 @@ def get_longest_lifespan_breed(cache_file):
             max_life = entry["data"]["attributes"]["life"]["max"]
         except (KeyError, TypeError):
             continue
+        if not isinstance(max_life, int):
+            continue
         if max_life > best_life:
             best_life = max_life
             best_name = name
