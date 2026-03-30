@@ -1,16 +1,13 @@
 # SI 201 HW6 (APIs, JSON, and Caching)
-# Your name:
-# Your student id:
-# Your email:
+# Your name: Ryan Brenner
+# Your student id: 72370621
+# Your email: ryanbren@umich.edu
 # Who or what you worked with on this homework (including generative AI like ChatGPT):
 # If you worked with generative AI also add a statement for how you used it.
 # e.g.:
-# Asked ChatGPT for help debugging and understanding the JSON structure
+# Asked ChatGPT for help debugging and understanding the JSON structure. Asked it 
+# for sanity checks and to help me understand translate error messages into English
 #
-# Did your use of GenAI on this assignment align with your goals and guidelines in your Gen AI contract? If not, why?
-#
-# --- ARGUMENTS & EXPECTED RETURN VALUES PROVIDED --- #
-# --- SEE INSTRUCTIONS FOR FULL DETAILS ON METHOD IMPLEMENTATION --- #
 
 import requests
 import json
@@ -34,18 +31,9 @@ def load_json(filename):
 
 
 def create_cache(dictionary, filename):
-    """
-    Converts a Python dictionary into JSON and writes it to filename (overwrites the
-    file if it already exists). Used to save the breed cache to disk.
+    with open(filename, 'w', encoding='utf-8') as f:
+        json.dump(dictionary, f)
 
-    ARGUMENTS:
-        dictionary: the cache dictionary (keys are often request URLs, values are API JSON)
-        filename: the file to write to
-
-    RETURNS:
-        None
-    """
-    pass
 
 
 def search_breed(breed_id):
@@ -62,24 +50,45 @@ def search_breed(breed_id):
         JSON body as a dict (with a top-level 'data' key on success), OR None if the
         request failed or the response does not represent a successful breed lookup.
     """
-    pass
+    url = f"https://dogapi.dog/api/v2/breeds/{breed_id}"
+
+    try: 
+        response = requests.get(url)
+    except requests.RequestException:
+        return None
+    if response.status_code != 200:
+        return None
+    try: 
+        data= response.json()
+    except ValueError:
+        return None
+    if not data or data.get("data") is None:
+        return None
+    return (data, url)
+
+
+
 
 
 def update_cache(breed_ids, cache_file):
-    """
-    For each breed_id, fetch data from the API and add it to the cache if not already present.
-    Skip requests for breeds whose URL is already in the cache. Only count newly added,
-    successful results. After processing all IDs, save the updated cache.
+    cache = load_json(cache_file)
+    new_succesful = 0
+    for breed_id in breed_ids:
+        url = f"https://dogapi.dog/api/b2/breeds/{breed_id}"
+        if url in cache:
+            continue
+        result = search_breed(breed_id)
+        if result is not None:
+            data, request_url = result
+            cache[request_url] = data
+            new_succesful += 1
 
-    ARGUMENTS:
-        breed_ids: list of breed id strings to fetch
-        cache_file: path to the JSON cache file (may not exist yet; treat missing as {})
+        create_cache(cache, cache_file)
+        percentage = (new_succesful / len(breed_ids)) * 100
+        return f"Cached data for {percentage}% of breeds"
 
-    RETURNS:
-        A string: "Cached data for {percentage}% of breeds",
-        where percentage = (successful_new_adds / len(breed_ids)) * 100.
-    """
-    pass
+
+   
 
 
 def get_longest_lifespan_breed(cache_file):
